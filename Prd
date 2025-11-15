@@ -1,0 +1,200 @@
+QuestForge: The DM's Idea Engine
+Version: 1.0 (Prototype)
+Status: Draft
+Last Updated: November 2025
+Overview
+QuestForge is a web-based AI-powered content generator that helps Dungeon Masters create compelling D&D content in seconds. Input your campaign themes and character details to receive customized plot hooks, combat encounters, and lore pieces.
+Vision
+Become the go-to creative assistant for DMs, reducing prep time while enhancing campaign quality through AI-powered content generation.
+Key Goals
+
+Generate high-quality D&D content instantly
+Overcome creative blocks and writer's fatigue
+Maintain campaign consistency with customized outputs
+
+
+Target Users
+Primary: "Busy Brandon" - The Time-Starved DM
+
+Age: 28-45 | Experience: 2-10 years
+Pain Points: Limited prep time, weekly content demands, improvisation challenges
+Needs: Quick, high-quality, personalized content
+
+Secondary: "New Nicole" - The First-Time DM
+
+Age: 18-30 | Experience: 0-1 years
+Pain Points: Overwhelmed by world-building, uncertain about design, lacks confidence
+Needs: Templates and examples to learn from
+
+Tertiary: "Veteran Victor" - The Long-Running Campaign DM
+
+Age: 35-60 | Experience: 10+ years
+Pain Points: Keeping campaigns fresh, interconnected stories, quick improvisation
+Needs: Creative inspiration and rapid generation tools
+
+
+Core Features
+1. AI Input Panel
+Interactive form capturing campaign context for content generation.
+Components:
+
+Campaign Theme (text, 3-100 chars) - e.g., "Ancient Ruin," "Political Intrigue"
+Character/NPC Trait (text, 5-150 chars) - e.g., "Gnome Rogue with gambling problem"
+Idea Type (dropdown) - Plot Hook, Combat Encounter, or Lore Piece
+Generate Button - "Forge the Quest!" with loading animation (1.5s)
+
+2. Results Display
+Formatted output showing generated D&D content.
+Structure:
+
+Title - Evocative, fantasy-styled name (3-8 words)
+Summary - 2-3 sentence narrative (50-150 words)
+Obstacle - Single sentence challenge (20-50 words)
+
+3. Fantasy-Themed UI/UX
+Immersive visual design with tabletop RPG aesthetics.
+Design Elements:
+
+Dark charcoal background with gold accents
+Georgia serif typography (medieval aesthetic)
+Subtle glow effects and smooth transitions
+Responsive layout (desktop and mobile)
+
+
+Technical Stack
+Frontend:     React 18.3.1 + TypeScript
+Build Tool:   Vite
+Styling:      Tailwind CSS 3.x
+Components:   shadcn-ui
+Icons:        lucide-react
+State:        React useState hooks
+Data Structure
+typescriptinterface QuestResult {
+  title: string;      // Generated quest title
+  summary: string;    // 2-3 sentence description
+  obstacle: string;   // Challenge/complication
+}
+
+Success Metrics
+Primary (Prototype Phase)
+
+Engagement: ≥3 generations per session
+Usability: ≥95% form completion rate
+Performance: ≤2s page load, ≤3s generation time
+
+Quality Standards
+
+Form error rate: ≤10%
+Time to first generation: ≤45 seconds
+Mobile usability score: ≥90/100
+
+
+Content Requirements
+Template Standards
+Each template must include:
+Title:
+
+Evocative and memorable (3-8 words)
+Proper capitalization, no generic names
+
+Summary:
+
+2-3 complete sentences in present tense
+Include sensory details or atmosphere
+End with a hook or call to action
+
+Obstacle:
+
+Single actionable sentence
+Suggests player choice or complexity
+Mechanically or narratively meaningful
+
+Content Types
+
+Plot Hook: Story initiation, mystery, intriguing tone
+Combat Encounter: Tactical situation, action-oriented, battlefield conditions
+Lore Piece: Historical context, scholarly tone, world-building
+
+
+Out of Scope (v1.0)
+Not included in this version:
+
+❌ User authentication/profiles
+❌ Saved content history
+❌ Edit or export functionality
+❌ Real AI integration (using templates for v1.0)
+❌ Social features or sharing
+❌ Payment/premium features
+❌ Additional generators (NPC, items, dungeons)
+
+
+Future Roadmap
+Phase 2: Real AI Integration (Q1 2026)
+
+Replace templates with GPT-4/Gemini API
+Streaming responses for real-time generation
+Context retention across generations
+
+Phase 3: Content Management (Q2 2026)
+
+User authentication and profiles
+Personal content library with editing
+Export options (PDF, Markdown)
+
+Phase 4: Enhanced Features (Q3 2026)
+
+NPC generator with personality traits
+Magic item generator
+Random encounter tables
+Session planning tools
+
+Phase 5: Community & Monetization (Q4 2026)
+
+Free tier (10 generations/day)
+Pro tier ($9/month, unlimited)
+Template marketplace
+Campaign sharing features
+
+
+Testing Requirements
+Must Test
+
+✅ Template selection logic returns valid results
+✅ Input validation rejects invalid inputs
+✅ Form submission triggers generation correctly
+✅ Loading states appear and clear properly
+✅ Cross-browser compatibility (Chrome, Firefox, Safari, Edge)
+✅ Mobile usability on small screens
+✅ Keyboard navigation throughout
+✅ WCAG AA accessibility standards
+
+
+Deployment
+Platform: Lovable Cloud (automatic deployment)
+URL: [project-name].lovable.app
+SSL: Automatic via platform
+Launch Checklist
+
+ All tests passing
+ Cross-browser testing complete
+ Mobile testing complete
+ README updated
+ Error boundaries in place
+ Performance budget met (<2s load)
+ Accessibility audit complete (WCAG AA)
+ Content templates proofread
+
+
+Example Template
+Title: The Whispers of the Obsidian Labyrinth
+Summary: Deep beneath the forgotten city, an ancient maze awakens. Local miners report hearing voices that speak in forgotten tongues, promising power to those brave enough to descend. The voices grow stronger each night, and some miners have not returned.
+Obstacle: The labyrinth shifts its corridors every dawn, and the voices belong to imprisoned spirits who seek bodies to possess.
+
+Glossary
+
+DM (Dungeon Master): Person who runs the D&D game
+Plot Hook: Narrative element to engage players in a story
+Combat Encounter: Structured battle scenario
+Lore: Background information about the game world
+NPC (Non-Player Character): Characters controlled by the DM
+Campaign: Ongoing series of connected D&D sessions
