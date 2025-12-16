@@ -64,33 +64,37 @@ Content Type: ${ideaType}
 Generate a ${ideaType} for this D&D campaign.`;
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            system_instruction: {
+              parts: [{ text: SYSTEM_PROMPT }],
+            },
             contents: [
               {
-                parts: [
-                  { text: SYSTEM_PROMPT },
-                  { text: userPrompt }
-                ]
-              }
+                role: "user",
+                parts: [{ text: userPrompt }],
+              },
             ],
             generationConfig: {
               temperature: 0.9,
               topK: 40,
               topP: 0.95,
               maxOutputTokens: 1024,
-            }
+            },
           }),
         }
       );
 
       if (!response.ok) {
-        throw new Error("API request failed");
+        const errBody = await response.text().catch(() => "");
+        throw new Error(
+          `API request failed (${response.status})${errBody ? `: ${errBody}` : ""}`
+        );
       }
 
       const data = await response.json();
@@ -133,8 +137,7 @@ Generate a ${ideaType} for this D&D campaign.`;
 
       setTimeout(() => {
         toast({
-          title: "The forge is temporarily cooling",
-          description: "Please try again in a moment.",
+          description: "The forge is temporarily cooling. Please try again.",
           variant: "destructive",
         });
         setIsForging(false);
