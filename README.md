@@ -160,11 +160,9 @@ QuestForge features a custom fantasy-themed design with:
 
 ---
 
-## 🚀 Future AI Integration
+## 🚀 AI Integration
 
-**Current Status:** QuestForge currently uses a simulated AI system with pre-written templates to demonstrate the concept and user experience. This allows you to explore the interface and understand the value proposition.
-
-**Roadmap:** Future versions will integrate real AI models (such as GPT-4 or Claude) to generate truly unique, context-aware content for unlimited creative possibilities.
+QuestForge now uses **Google Gemini AI** to generate unique, context-aware D&D plot hooks, combat encounters, and lore pieces from your inputs.
 
 ---
 
