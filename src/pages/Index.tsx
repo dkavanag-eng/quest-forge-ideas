@@ -36,13 +36,18 @@ const Index = () => {
     const startTime = Date.now();
 
     try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      
+      if (!supabaseUrl) {
+        throw new Error("Backend not configured");
+      }
+      
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-quest`,
+        `${supabaseUrl}/functions/v1/generate-quest`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({ theme, character, ideaType }),
         }
