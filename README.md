@@ -162,7 +162,7 @@ QuestForge features a custom fantasy-themed design with:
 
 ## 🚀 AI Integration
 
-QuestForge now uses **Google Gemini AI** to generate unique, context-aware D&D plot hooks, combat encounters, and lore pieces from your inputs.
+QuestForge uses **Lovable AI** to generate unique, context-aware D&D plot hooks, combat encounters, and lore pieces from your inputs.
 
 ---
 
