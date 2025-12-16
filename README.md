@@ -2,13 +2,19 @@
 
 > An AI-powered D&D plot generator that transforms your campaign themes into epic adventures
 
-QuestForge is an interactive web application designed to help Dungeon Masters quickly generate compelling plot hooks, combat encounters, and lore pieces for their D&D campaigns. Simply input your campaign theme, key characters, and desired content type—and watch QuestForge craft unique story elements tailored to your world.
+QuestForge is an interactive web application designed to help Dungeon Masters quickly generate compelling plot hooks, combat encounters, and lore pieces for their D&D campaigns. Simply input your campaign theme, key characters, and desired content type—and watch QuestForge craft unique story elements tailored to your world using real AI.
 
 ---
 
-## ✨ AI Features
+## 🎬 Demo Video
 
-QuestForge uses intelligent generation to create three distinct types of D&D content:
+[📺 Watch the Demo Video](#) <!-- Replace with your actual demo video link -->
+
+---
+
+## ✨ AI-Powered Features
+
+QuestForge uses **Lovable AI** (powered by Google Gemini 2.5 Flash) to generate unique, context-aware D&D content in real-time.
 
 ### 🎲 Plot Hook Generator
 Generates compelling story hooks and quest starters based on your campaign themes and character details. Perfect for kicking off new adventures or creating side quests that feel organic to your world.
@@ -45,7 +51,7 @@ Builds world-building content including historical events, legendary artifacts, 
 - **Key Character:** "Gnome Rogue with a gambling problem"
 - **Idea Type:** Plot Hook
 
-**Output:**
+**AI-Generated Output:**
 ```
 Title: The Whispers of the Obsidian Labyrinth
 
@@ -66,7 +72,7 @@ still patrol its halls.
 - **Key Character:** "Nomad Warrior seeking revenge"
 - **Idea Type:** Combat Encounter
 
-**Output:**
+**AI-Generated Output:**
 ```
 Title: Sandstorm Ambush at the Dune Sea
 
@@ -87,7 +93,7 @@ quicksand patches that emerge during the storm.
 - **Key Character:** "A King in disguise"
 - **Idea Type:** Lore Piece
 
-**Output:**
+**AI-Generated Output:**
 ```
 Title: The Treaty of Broken Crowns
 
@@ -111,9 +117,9 @@ requires deciphering coded royal genealogies hidden across the kingdoms.
 
 2. **Forge Your Quest**
    - Click the "Forge the Quest!" button
-   - QuestForge's AI processes your inputs
+   - Lovable AI processes your inputs with a specialized D&D system prompt
 
-3. **Receive Formatted Output**
+3. **Receive AI-Generated Output**
    - **Title:** An evocative name for your content
    - **Summary:** A 2-3 sentence description ready to use at your table
    - **Suggested Obstacle:** A challenge or complication to drive player engagement
@@ -144,12 +150,15 @@ requires deciphering coded royal genealogies hidden across the kingdoms.
 
 This project is built with modern web technologies:
 
-- **React** - Interactive UI components
-- **TypeScript** - Type-safe code
-- **Vite** - Fast build tooling
-- **Tailwind CSS** - Fantasy-themed styling with custom design tokens
-- **shadcn-ui** - Beautiful, accessible component library
-- **Lucide React** - Icon system
+| Category | Technology |
+|----------|------------|
+| **Frontend** | React 18.3.1 + TypeScript |
+| **Build Tool** | Vite |
+| **Styling** | Tailwind CSS 3.x |
+| **Components** | shadcn-ui |
+| **Icons** | Lucide React |
+| **Backend** | Lovable Cloud (Edge Functions) |
+| **AI** | Lovable AI Gateway (Gemini 2.5 Flash) |
 
 ### Design System
 QuestForge features a custom fantasy-themed design with:
@@ -162,7 +171,14 @@ QuestForge features a custom fantasy-themed design with:
 
 ## 🚀 AI Integration
 
-QuestForge uses **Lovable AI** to generate unique, context-aware D&D plot hooks, combat encounters, and lore pieces from your inputs.
+QuestForge uses **Lovable AI** to generate unique, context-aware D&D content. The integration works through:
+
+1. **Edge Function:** A secure backend function handles all AI requests
+2. **Lovable AI Gateway:** Connects to Google Gemini 2.5 Flash model
+3. **Structured Output:** Uses tool calling for consistent JSON responses
+4. **Tone Adaptation:** System prompt adjusts based on content type (mysterious for plot hooks, tactical for combat, scholarly for lore)
+
+No API keys required—Lovable AI is built into the platform.
 
 ---
 
