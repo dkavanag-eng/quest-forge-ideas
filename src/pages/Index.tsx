@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sparkles, Scroll } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface QuestResult {
   title: string;
@@ -18,144 +19,188 @@ interface QuestResult {
   obstacle: string;
 }
 
+const GEMINI_API_KEY = "AIzaSyC2dXxNw7DFJy-3erNtq6epfMNr1jHMv3E";
+
+const SYSTEM_PROMPT = `You are QuestForge, a creative assistant for Dungeon Masters. Generate D&D content based on the user's inputs.
+
+You will receive:
+- Campaign Theme (e.g., "Ancient Ruin", "Political Intrigue")
+- Character/NPC Trait (e.g., "Gnome Rogue with a gambling problem")
+- Content Type: either "Plot Hook", "Combat Encounter", or "Lore Piece"
+
+Respond ONLY in this exact JSON format, no other text:
+{
+  "title": "An evocative 3-8 word title",
+  "summary": "2-3 sentences describing the scenario (50-150 words). Use present tense, include sensory details, end with a hook.",
+  "obstacle": "One sentence describing a challenge or complication (20-50 words)."
+}
+
+Match your tone to the content type:
+- Plot Hook: Mysterious, intriguing, story-focused
+- Combat Encounter: Action-oriented, tactical, describe battlefield conditions
+- Lore Piece: Scholarly, historical, world-building focused`;
+
 const Index = () => {
   const [theme, setTheme] = useState("");
   const [character, setCharacter] = useState("");
   const [ideaType, setIdeaType] = useState("");
   const [result, setResult] = useState<QuestResult | null>(null);
   const [isForging, setIsForging] = useState(false);
+  const { toast } = useToast();
 
-  const questTemplates = {
-    "Plot Hook": [
-      {
-        title: "The Whispers of the Obsidian Labyrinth",
-        summary: "Deep beneath the forgotten city, an ancient maze awakens. Local miners report hearing voices that speak in forgotten tongues, promising power to those brave enough to descend. The voices grow stronger each night, and some miners have not returned.",
-        obstacle: "The labyrinth shifts its corridors every dawn, and the voices belong to imprisoned spirits who seek bodies to possess."
-      },
-      {
-        title: "The Pact of Crimson Shadows",
-        summary: "A wealthy merchant offers an impossible sum for a simple delivery to a remote monastery. The package is sealed with blood-red wax and pulses with an unnatural warmth. He warns that failure to deliver by the full moon will have dire consequences.",
-        obstacle: "A rival faction seeks to intercept the package, and the monastery holds dark secrets about the merchant's true intentions."
-      },
-      {
-        title: "The Weeping Stones",
-        summary: "Ancient standing stones across the realm have begun to cry actual tears. Scholars are baffled as the phenomenon spreads. A dying oracle speaks of a great wrong that must be righted before the stones' sorrow drowns the world.",
-        obstacle: "The tears are acidic and corrupting the land. The party must piece together historical fragments to uncover a millennia-old betrayal."
-      }
-    ],
-    "Combat Encounter": [
-      {
-        title: "Ambush at the Gilded Bridge",
-        summary: "As the party crosses an ornate bridge spanning a misty ravine, shadows detach from the stonework itself. These shadow-thieves feed on memories and have been trapped in the bridge's architecture for centuries, waiting for fresh minds to drain.",
-        obstacle: "The bridge begins to collapse as the combat intensifies, forcing tactical decisions between fighting and fleeing."
-      },
-      {
-        title: "The Bone Garden Guardians",
-        summary: "In an overgrown cemetery, skeletal warriors rise when the party disturbs a particular grave. These are no mindless undead—they retain their combat skills and tactical awareness from life, forming shield walls and executing coordinated strikes.",
-        obstacle: "The skeletons regenerate unless their anchor—a cursed medallion buried somewhere in the cemetery—is found and destroyed."
-      },
-      {
-        title: "Ritual of the Crimson Circle",
-        summary: "The party interrupts cultists mid-ritual in an abandoned temple. Though the cultists are relatively weak, their ritual is nearly complete, and its energies lash out randomly during combat, creating a chaotic and unpredictable battlefield.",
-        obstacle: "The party must decide whether to focus on the cultists or disrupt the ritual circle itself, each choice carrying consequences."
-      }
-    ],
-    "Lore Piece": [
-      {
-        title: "The Architect's Folly",
-        summary: "Ancient texts reveal that the realm's greatest architect was commissioned to build a grand palace but secretly encoded a terrible prophecy into its very structure. The palace stands today as the kingdom's seat of power, its true purpose hidden in geometric patterns and hidden chambers.",
-        obstacle: "Uncovering the full prophecy requires accessing chambers that would reveal the conspiracy to current royal guards."
-      },
-      {
-        title: "Song of the Starfall",
-        summary: "A bardic ballad tells of a meteor shower that blessed certain bloodlines with magical ability. Recent astronomical records suggest another starfall approaches, but the song's final verse—describing a great cost—has been lost to time.",
-        obstacle: "The only complete version of the song exists in the mind of an ancient dragon who values secrets more than gold."
-      },
-      {
-        title: "The Sunken Library",
-        summary: "Legends speak of a vast repository of knowledge that sank beneath the waves during a cataclysm. Merfolk whisper of glowing texts visible in the deepest trenches, and scholars offer fortunes for even fragments of waterlogged pages.",
-        obstacle: "The library is guarded by creatures who have evolved to the crushing depths and view the knowledge as sacred."
-      }
-    ]
-  };
-
-  const forgeQuest = () => {
+  const forgeQuest = async () => {
     if (!theme || !character || !ideaType) {
       return;
     }
 
     setIsForging(true);
+    const startTime = Date.now();
 
-    setTimeout(() => {
-      const templates = questTemplates[ideaType as keyof typeof questTemplates];
-      const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
+    try {
+      const userPrompt = `Campaign Theme: ${theme}
+Character/NPC: ${character}
+Content Type: ${ideaType}
+
+Generate a ${ideaType} for this D&D campaign.`;
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  { text: SYSTEM_PROMPT },
+                  { text: userPrompt }
+                ]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.9,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 1024,
+            }
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("API request failed");
+      }
+
+      const data = await response.json();
+      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!generatedText) {
+        throw new Error("No response from AI");
+      }
+
+      // Parse JSON from response (handle potential markdown code blocks)
+      let jsonText = generatedText.trim();
+      if (jsonText.startsWith("```json")) {
+        jsonText = jsonText.slice(7);
+      }
+      if (jsonText.startsWith("```")) {
+        jsonText = jsonText.slice(3);
+      }
+      if (jsonText.endsWith("```")) {
+        jsonText = jsonText.slice(0, -3);
+      }
+      jsonText = jsonText.trim();
+
+      const questResult: QuestResult = JSON.parse(jsonText);
+
+      // Ensure minimum 1.5s loading time for intentional feel
+      const elapsed = Date.now() - startTime;
+      const remainingTime = Math.max(0, 1500 - elapsed);
+
+      setTimeout(() => {
+        setResult(questResult);
+        setIsForging(false);
+      }, remainingTime);
+
+    } catch (error) {
+      console.error("Forge error:", error);
       
-      // Customize the template slightly based on inputs
-      const customizedResult = {
-        ...randomTemplate,
-        summary: randomTemplate.summary.replace(/party/g, "adventurers") + ` The ${theme.toLowerCase()} atmosphere adds an additional layer of mystery and danger.`,
-      };
+      // Ensure minimum loading time even on error
+      const elapsed = Date.now() - startTime;
+      const remainingTime = Math.max(0, 1500 - elapsed);
 
-      setResult(customizedResult);
-      setIsForging(false);
-    }, 1500);
+      setTimeout(() => {
+        toast({
+          title: "The forge is temporarily cooling",
+          description: "Please try again in a moment.",
+          variant: "destructive",
+        });
+        setIsForging(false);
+      }, remainingTime);
+    }
   };
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Atmospheric background effects */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-burgundy/20 via-background to-background pointer-events-none" />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-forest/15 via-transparent to-transparent pointer-events-none" />
+      
+      <div className="relative z-10 container mx-auto px-4 py-12">
         {/* Header */}
-        <div className="text-center mb-12 animate-in fade-in duration-1000">
+        <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Sparkles className="w-10 h-10 text-gold animate-pulse" />
-            <h1 className="text-5xl font-bold text-gold tracking-wide">
+            <Sparkles className="w-8 h-8 text-gold animate-pulse" />
+            <h1 className="text-4xl md:text-5xl font-bold text-gold font-serif tracking-wide">
               QuestForge
             </h1>
-            <Sparkles className="w-10 h-10 text-gold animate-pulse" />
+            <Sparkles className="w-8 h-8 text-gold animate-pulse" />
           </div>
-          <p className="text-xl text-muted-foreground italic">
-            The DM's Idea Engine
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            The DM's Idea Engine — Forge compelling plot hooks, combat encounters, and lore pieces for your D&D campaigns using AI.
           </p>
         </div>
 
         {/* Input Panel */}
-        <Card className="p-8 mb-8 bg-card border-border/50 deep-shadow animate-in slide-in-from-bottom duration-700">
+        <Card className="max-w-2xl mx-auto p-8 bg-card/80 backdrop-blur-sm border-border/50 shadow-deep mb-8">
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="theme" className="text-lg text-foreground">
+              <Label htmlFor="theme" className="text-foreground font-medium">
                 Campaign Theme
               </Label>
               <Input
                 id="theme"
-                placeholder="e.g., Ancient Ruin, Political Intrigue, Desert Survival"
+                placeholder="e.g., Ancient Ruin, Political Intrigue, Desert Survival..."
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
-                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
+                className="bg-background/50 border-border/50 focus:border-gold/50 focus:ring-gold/20"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="character" className="text-lg text-foreground">
+              <Label htmlFor="character" className="text-foreground font-medium">
                 Key Character/NPC Trait
               </Label>
               <Input
                 id="character"
-                placeholder="e.g., Gnome Rogue with a gambling problem, A King in disguise"
+                placeholder="e.g., Gnome Rogue with a gambling problem, A King in disguise..."
                 value={character}
                 onChange={(e) => setCharacter(e.target.value)}
-                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
+                className="bg-background/50 border-border/50 focus:border-gold/50 focus:ring-gold/20"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="ideaType" className="text-lg text-foreground">
+              <Label htmlFor="ideaType" className="text-foreground font-medium">
                 Idea Type
               </Label>
               <Select value={ideaType} onValueChange={setIdeaType}>
-                <SelectTrigger className="bg-input border-border text-foreground">
-                  <SelectValue placeholder="Select an idea type" />
+                <SelectTrigger className="bg-background/50 border-border/50 focus:border-gold/50 focus:ring-gold/20">
+                  <SelectValue placeholder="Select the type of content to generate..." />
                 </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
+                <SelectContent>
                   <SelectItem value="Plot Hook">Plot Hook</SelectItem>
                   <SelectItem value="Combat Encounter">Combat Encounter</SelectItem>
                   <SelectItem value="Lore Piece">Lore Piece</SelectItem>
@@ -166,18 +211,18 @@ const Index = () => {
             <Button
               onClick={forgeQuest}
               disabled={!theme || !character || !ideaType || isForging}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg py-6 transition-all duration-300 hover:glow-effect"
+              className="w-full bg-gradient-to-r from-gold/90 to-gold hover:from-gold hover:to-gold/90 text-background font-semibold py-6 text-lg transition-all duration-300 hover:shadow-glow disabled:opacity-50"
             >
               {isForging ? (
-                <>
-                  <Sparkles className="mr-2 h-5 w-5 animate-spin" />
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 animate-spin" />
                   Forging...
-                </>
+                </span>
               ) : (
-                <>
-                  <Scroll className="mr-2 h-5 w-5" />
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5" />
                   Forge the Quest!
-                </>
+                </span>
               )}
             </Button>
           </div>
@@ -185,32 +230,30 @@ const Index = () => {
 
         {/* Results Display */}
         {result && (
-          <Card className="p-8 bg-card border-gold/30 deep-shadow animate-in slide-in-from-bottom duration-700">
+          <Card className="max-w-2xl mx-auto p-8 bg-card/80 backdrop-blur-sm border-border/50 shadow-deep animate-fade-in">
             <div className="space-y-6">
-              <div className="border-b border-border pb-4">
-                <h2 className="text-3xl font-bold text-gold mb-2">
+              <div className="flex items-start gap-3">
+                <Scroll className="w-6 h-6 text-gold mt-1 flex-shrink-0" />
+                <h2 className="text-2xl font-bold text-gold font-serif">
                   {result.title}
                 </h2>
-                <div className="h-1 w-24 bg-gold/50 rounded"></div>
               </div>
-
+              
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-secondary mb-2 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
                     Summary
                   </h3>
-                  <p className="text-foreground/90 leading-relaxed pl-4">
+                  <p className="text-foreground leading-relaxed">
                     {result.summary}
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-accent mb-2 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-accent rounded-full"></div>
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
                     Suggested Obstacle
                   </h3>
-                  <p className="text-foreground/90 leading-relaxed pl-4">
+                  <p className="text-foreground/90 italic">
                     {result.obstacle}
                   </p>
                 </div>
@@ -218,11 +261,6 @@ const Index = () => {
             </div>
           </Card>
         )}
-
-        {/* Footer */}
-        <div className="text-center mt-12 text-muted-foreground text-sm">
-          <p className="italic">QuestForge - A Vibe Coding Project</p>
-        </div>
       </div>
     </div>
   );
