@@ -19,27 +19,6 @@ interface QuestResult {
   obstacle: string;
 }
 
-const GEMINI_API_KEY = "AIzaSyC2dXxNw7DFJy-3erNtq6epfMNr1jHMv3E";
-
-const SYSTEM_PROMPT = `You are QuestForge, a creative assistant for Dungeon Masters. Generate D&D content based on the user's inputs.
-
-You will receive:
-- Campaign Theme (e.g., "Ancient Ruin", "Political Intrigue")
-- Character/NPC Trait (e.g., "Gnome Rogue with a gambling problem")
-- Content Type: either "Plot Hook", "Combat Encounter", or "Lore Piece"
-
-Respond ONLY in this exact JSON format, no other text:
-{
-  "title": "An evocative 3-8 word title",
-  "summary": "2-3 sentences describing the scenario (50-150 words). Use present tense, include sensory details, end with a hook.",
-  "obstacle": "One sentence describing a challenge or complication (20-50 words)."
-}
-
-Match your tone to the content type:
-- Plot Hook: Mysterious, intriguing, story-focused
-- Combat Encounter: Action-oriented, tactical, describe battlefield conditions
-- Lore Piece: Scholarly, historical, world-building focused`;
-
 const Index = () => {
   const [theme, setTheme] = useState("");
   const [character, setCharacter] = useState("");
@@ -57,67 +36,30 @@ const Index = () => {
     const startTime = Date.now();
 
     try {
-      const userPrompt = `Campaign Theme: ${theme}
-Character/NPC: ${character}
-Content Type: ${ideaType}
-
-Generate a ${ideaType} for this D&D campaign.`;
-
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-quest`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({
-            system_instruction: {
-              parts: [{ text: SYSTEM_PROMPT }],
-            },
-            contents: [
-              {
-                role: "user",
-                parts: [{ text: userPrompt }],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.9,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 1024,
-            },
-          }),
+          body: JSON.stringify({ theme, character, ideaType }),
         }
       );
 
       if (!response.ok) {
-        const errBody = await response.text().catch(() => "");
-        throw new Error(
-          `API request failed (${response.status})${errBody ? `: ${errBody}` : ""}`
-        );
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "API request failed");
       }
 
       const data = await response.json();
-      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
-      if (!generatedText) {
-        throw new Error("No response from AI");
+      if (data.error) {
+        throw new Error(data.error);
       }
 
-      // Parse JSON from response (handle potential markdown code blocks)
-      let jsonText = generatedText.trim();
-      if (jsonText.startsWith("```json")) {
-        jsonText = jsonText.slice(7);
-      }
-      if (jsonText.startsWith("```")) {
-        jsonText = jsonText.slice(3);
-      }
-      if (jsonText.endsWith("```")) {
-        jsonText = jsonText.slice(0, -3);
-      }
-      jsonText = jsonText.trim();
-
-      const questResult: QuestResult = JSON.parse(jsonText);
+      const questResult: QuestResult = data;
 
       // Ensure minimum 1.5s loading time for intentional feel
       const elapsed = Date.now() - startTime;
